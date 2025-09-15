@@ -1,9 +1,6 @@
+import SnakeGame from "./components/SnakeGame";
 import './App.css';
 
 export default function App() {
-  return (
-    <>
-      <h1>Snake</h1>
-    </>
-  )
+  return <SnakeGame />;
 }
