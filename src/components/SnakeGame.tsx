@@ -15,6 +15,7 @@ export default function SnakeGame() {
     const [food, setFood] = useState<Position>(getRandomPosition());
     const [gameOver, setGameOver] = useState(false);
 
+    // Tastatursteuerung
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if (
@@ -46,6 +47,7 @@ export default function SnakeGame() {
         return () => window.removeEventListener("keydown", handleKey);
     }, [direction]);
 
+    // Snake Bewegung
     const moveSnake = useCallback(() => {
         const head = { ...snake[0] };
 
@@ -100,7 +102,7 @@ export default function SnakeGame() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen w-screen overflow-hidden bg-blue-950 text-white">
+        <div className="flex flex-col items-center justify-center fixed top-0 left-0 h-screen w-screen bg-blue-950 text-white">
             <h1 className="text-4xl font-extrabold mb-6 text-green-300 drop-shadow-lg">
                 🐍 Snake Game
             </h1>
