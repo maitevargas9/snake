@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Cell from "./Cell";
 import Score from "./Score";
 import GameOver from "./GameOver";
@@ -19,6 +19,8 @@ export default function SnakeGame() {
     const [score, setScore] = useState(0);
     const [highscore, setHighscore] = useState<number>(0);
 
+    const intervalRef = useRef<number | null>(null);
+
     useEffect(() => {
         const saved = localStorage.getItem("snakeHighscore");
         if (saved) {
@@ -31,7 +33,6 @@ export default function SnakeGame() {
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
                 e.preventDefault();
             }
-
             switch (e.key) {
                 case "ArrowUp":
                     if (direction !== "DOWN") {
@@ -63,25 +64,15 @@ export default function SnakeGame() {
     const moveSnake = useCallback(() => {
         const head = { ...snake[0] };
         switch (direction) {
-            case "UP":
-                head.y -= 1;
-                break;
-            case "DOWN":
-                head.y += 1;
-                break;
-            case "LEFT":
-                head.x -= 1;
-                break;
-            case "RIGHT":
-                head.x += 1;
-                break;
+            case "UP": head.y -= 1; break;
+            case "DOWN": head.y += 1; break;
+            case "LEFT": head.x -= 1; break;
+            case "RIGHT": head.x += 1; break;
         }
 
         if (
-            head.x < 0 ||
-            head.x >= GRID_SIZE ||
-            head.y < 0 ||
-            head.y >= GRID_SIZE ||
+            head.x < 0 || head.x >= GRID_SIZE ||
+            head.y < 0 || head.y >= GRID_SIZE ||
             snake.some((s) => s.x === head.x && s.y === head.y)
         ) {
             setGameOver(true);
@@ -93,7 +84,6 @@ export default function SnakeGame() {
         }
 
         const newSnake = [head, ...snake];
-
         if (head.x === food.x && head.y === food.y) {
             setFood(getRandomPosition());
             setScore((prev) => prev + 1);
@@ -106,11 +96,25 @@ export default function SnakeGame() {
 
     useEffect(() => {
         if (gameOver) {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
             return;
         }
-        const interval = setInterval(moveSnake, 200);
-        return () => clearInterval(interval);
-    }, [moveSnake, gameOver]);
+
+        const getSpeed = () => Math.max(50, 200 - score * 5);
+
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+        intervalRef.current = window.setInterval(moveSnake, getSpeed());
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [moveSnake, score, gameOver]);
 
     const resetGame = () => {
         setSnake([{ x: 10, y: 10 }]);
@@ -136,7 +140,11 @@ export default function SnakeGame() {
                 >
                     {Array.from({ length: GRID_SIZE }).map((_, y) =>
                         Array.from({ length: GRID_SIZE }).map((_, x) => (
-                            <Cell key={`${x}-${y}`} isSnake={snake.some((s) => s.x === x && s.y === y)} isFood={food.x === x && food.y === y} />
+                            <Cell
+                                key={`${x}-${y}`}
+                                isSnake={snake.some((s) => s.x === x && s.y === y)}
+                                isFood={food.x === x && food.y === y}
+                            />
                         ))
                     )}
                 </div>
