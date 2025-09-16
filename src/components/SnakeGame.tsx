@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+import Cell from "./Cell";
+import Score from "./Score";
+import GameOver from "./GameOver";
 
 type Position = { x: number; y: number };
-
 const GRID_SIZE = 20;
 
 const getRandomPosition = (): Position => ({
@@ -26,27 +28,30 @@ export default function SnakeGame() {
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
-            if (
-                e.key === "ArrowUp" ||
-                e.key === "ArrowDown" ||
-                e.key === "ArrowLeft" ||
-                e.key === "ArrowRight"
-            ) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
                 e.preventDefault();
             }
 
             switch (e.key) {
                 case "ArrowUp":
-                    if (direction !== "DOWN") setDirection("UP");
+                    if (direction !== "DOWN") {
+                        setDirection("UP");
+                    }
                     break;
                 case "ArrowDown":
-                    if (direction !== "UP") setDirection("DOWN");
+                    if (direction !== "UP") {
+                        setDirection("DOWN");
+                    }
                     break;
                 case "ArrowLeft":
-                    if (direction !== "RIGHT") setDirection("LEFT");
+                    if (direction !== "RIGHT") {
+                        setDirection("LEFT");
+                    }
                     break;
                 case "ArrowRight":
-                    if (direction !== "LEFT") setDirection("RIGHT");
+                    if (direction !== "LEFT") {
+                        setDirection("RIGHT");
+                    }
                     break;
             }
         };
@@ -57,7 +62,6 @@ export default function SnakeGame() {
 
     const moveSnake = useCallback(() => {
         const head = { ...snake[0] };
-
         switch (direction) {
             case "UP":
                 head.y -= 1;
@@ -81,12 +85,10 @@ export default function SnakeGame() {
             snake.some((s) => s.x === head.x && s.y === head.y)
         ) {
             setGameOver(true);
-
             if (score > highscore) {
                 setHighscore(score);
                 localStorage.setItem("snakeHighscore", score.toString());
             }
-
             return;
         }
 
@@ -120,12 +122,9 @@ export default function SnakeGame() {
 
     return (
         <div className="flex flex-col items-center justify-center fixed top-0 left-0 h-screen w-screen bg-blue-950 text-white">
-            <h1 className="text-4xl font-extrabold mb-2 text-green-300 drop-shadow-lg">
-                🐍 Snake Game
-            </h1>
+            <h1 className="text-4xl font-extrabold mb-2 text-green-300 drop-shadow-lg">🐍 Snake Game</h1>
 
-            <p className="text-lg font-semibold mb-1">Score: {score}</p>
-            <p className="text-sm font-medium mb-6 text-green-200">High score: {highscore}</p>
+            <Score score={score} highscore={highscore} />
 
             <div className="relative p-4 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
                 <div
@@ -136,39 +135,13 @@ export default function SnakeGame() {
                     }}
                 >
                     {Array.from({ length: GRID_SIZE }).map((_, y) =>
-                        Array.from({ length: GRID_SIZE }).map((_, x) => {
-                            const isSnake = snake.some((s) => s.x === x && s.y === y);
-                            const isFood = food.x === x && food.y === y;
-                            return (
-                                <div
-                                    key={`${x}-${y}`}
-                                    className={`w-5 h-5 rounded-sm transition-colors ${isSnake
-                                        ? "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.6)]"
-                                        : isFood
-                                            ? "bg-red-500 shadow-[0_0_6px_2px_rgba(239,68,68,0.6)]"
-                                            : "bg-gray-700"
-                                        }`}
-                                />
-                            );
-                        })
+                        Array.from({ length: GRID_SIZE }).map((_, x) => (
+                            <Cell key={`${x}-${y}`} isSnake={snake.some((s) => s.x === x && s.y === y)} isFood={food.x === x && food.y === y} />
+                        ))
                     )}
                 </div>
 
-                {gameOver && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm rounded-2xl">
-                        <p className="text-3xl font-bold text-red-400 drop-shadow-md">
-                            Game Over!
-                        </p>
-                        <p className="mt-2 text-lg">Final Score: {score}</p>
-                        <p className="text-sm text-green-200">High score: {highscore}</p>
-                        <button
-                            onClick={resetGame}
-                            className="mt-4 px-6 py-3 bg-green-600 rounded-xl font-semibold text-lg hover:bg-green-700 shadow-lg transition"
-                        >
-                            Restart
-                        </button>
-                    </div>
-                )}
+                {gameOver && <GameOver score={score} highscore={highscore} onRestart={resetGame} />}
             </div>
         </div>
     );
