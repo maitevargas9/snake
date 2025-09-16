@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 type Position = { x: number; y: number };
 
 const GRID_SIZE = 20;
-const CELL_SIZE = 20;
 
 const getRandomPosition = (): Position => ({
     x: Math.floor(Math.random() * GRID_SIZE),
@@ -23,7 +22,9 @@ export default function SnakeGame() {
                 e.key === "ArrowDown" ||
                 e.key === "ArrowLeft" ||
                 e.key === "ArrowRight"
-            ) e.preventDefault();
+            ) {
+                e.preventDefault();
+            }
 
             switch (e.key) {
                 case "ArrowUp":
@@ -40,12 +41,14 @@ export default function SnakeGame() {
                     break;
             }
         };
+
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
     }, [direction]);
 
     const moveSnake = useCallback(() => {
         const head = { ...snake[0] };
+
         switch (direction) {
             case "UP":
                 head.y -= 1;
@@ -73,11 +76,13 @@ export default function SnakeGame() {
         }
 
         const newSnake = [head, ...snake];
+
         if (head.x === food.x && head.y === food.y) {
             setFood(getRandomPosition());
         } else {
             newSnake.pop();
         }
+
         setSnake(newSnake);
     }, [snake, direction, food]);
 
@@ -100,18 +105,12 @@ export default function SnakeGame() {
                 🐍 Snake Game
             </h1>
 
-            <div
-                className="relative p-4 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700"
-                style={{
-                    width: GRID_SIZE * CELL_SIZE + 16,
-                    height: GRID_SIZE * CELL_SIZE + 16,
-                }}
-            >
+            <div className="relative p-4 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
                 <div
                     className="grid gap-0.5 bg-gray-900 p-2 rounded-xl border border-gray-700"
                     style={{
-                        gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
-                        gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
+                        gridTemplateColumns: `repeat(${GRID_SIZE}, 20px)`,
+                        gridTemplateRows: `repeat(${GRID_SIZE}, 20px)`,
                     }}
                 >
                     {Array.from({ length: GRID_SIZE }).map((_, y) =>
@@ -121,8 +120,7 @@ export default function SnakeGame() {
                             return (
                                 <div
                                     key={`${x}-${y}`}
-                                    style={{ width: CELL_SIZE, height: CELL_SIZE }}
-                                    className={`rounded-sm transition-colors ${isSnake
+                                    className={`w-5 h-5 rounded-sm transition-colors ${isSnake
                                         ? "bg-green-500 shadow-[0_0_6px_2px_rgba(34,197,94,0.6)]"
                                         : isFood
                                             ? "bg-red-500 shadow-[0_0_6px_2px_rgba(239,68,68,0.6)]"
