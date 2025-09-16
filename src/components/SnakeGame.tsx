@@ -14,6 +14,15 @@ export default function SnakeGame() {
     const [direction, setDirection] = useState<"UP" | "DOWN" | "LEFT" | "RIGHT">("RIGHT");
     const [food, setFood] = useState<Position>(getRandomPosition());
     const [gameOver, setGameOver] = useState(false);
+    const [score, setScore] = useState(0);
+    const [highscore, setHighscore] = useState<number>(0);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("snakeHighscore");
+        if (saved) {
+            setHighscore(parseInt(saved));
+        }
+    }, []);
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -72,6 +81,12 @@ export default function SnakeGame() {
             snake.some((s) => s.x === head.x && s.y === head.y)
         ) {
             setGameOver(true);
+
+            if (score > highscore) {
+                setHighscore(score);
+                localStorage.setItem("snakeHighscore", score.toString());
+            }
+
             return;
         }
 
@@ -79,12 +94,13 @@ export default function SnakeGame() {
 
         if (head.x === food.x && head.y === food.y) {
             setFood(getRandomPosition());
+            setScore((prev) => prev + 1);
         } else {
             newSnake.pop();
         }
 
         setSnake(newSnake);
-    }, [snake, direction, food]);
+    }, [snake, direction, food, score, highscore]);
 
     useEffect(() => {
         if (gameOver) {
@@ -98,14 +114,18 @@ export default function SnakeGame() {
         setSnake([{ x: 10, y: 10 }]);
         setDirection("RIGHT");
         setFood(getRandomPosition());
+        setScore(0);
         setGameOver(false);
     };
 
     return (
         <div className="flex flex-col items-center justify-center fixed top-0 left-0 h-screen w-screen bg-blue-950 text-white">
-            <h1 className="text-4xl font-extrabold mb-6 text-green-300 drop-shadow-lg">
+            <h1 className="text-4xl font-extrabold mb-2 text-green-300 drop-shadow-lg">
                 🐍 Snake Game
             </h1>
+
+            <p className="text-lg font-semibold mb-1">Score: {score}</p>
+            <p className="text-sm font-medium mb-6 text-green-200">High score: {highscore}</p>
 
             <div className="relative p-4 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
                 <div
@@ -139,6 +159,8 @@ export default function SnakeGame() {
                         <p className="text-3xl font-bold text-red-400 drop-shadow-md">
                             Game Over!
                         </p>
+                        <p className="mt-2 text-lg">Final Score: {score}</p>
+                        <p className="text-sm text-green-200">High score: {highscore}</p>
                         <button
                             onClick={resetGame}
                             className="mt-4 px-6 py-3 bg-green-600 rounded-xl font-semibold text-lg hover:bg-green-700 shadow-lg transition"
