@@ -87,7 +87,9 @@ export default function SnakeGame() {
     }, [snake, direction, food]);
 
     useEffect(() => {
-        if (gameOver) return;
+        if (gameOver) {
+            return;
+        }
         const interval = setInterval(moveSnake, 200);
         return () => clearInterval(interval);
     }, [moveSnake, gameOver]);
