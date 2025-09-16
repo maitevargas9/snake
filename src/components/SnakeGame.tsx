@@ -144,6 +144,7 @@ export default function SnakeGame() {
                                 key={`${x}-${y}`}
                                 isSnake={snake.some((s) => s.x === x && s.y === y)}
                                 isFood={food.x === x && food.y === y}
+                                score={score}
                             />
                         ))
                     )}
